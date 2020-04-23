@@ -25,6 +25,9 @@
   },
   "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier"],
   "rules": {
+    "no-multi-str": "off",
+    "indent": ["error", 4],
+    "react/jsx-indent": ["error", 4],
     "react/jsx-props-no-spreading": "off",
     "prettier/prettier": "error",
     "react-hooks/rules-of-hooks": "error",

@@ -11,94 +11,133 @@ import Header from '../../components/Header';
 import formatValue from '../../utils/formatValue';
 
 import { Container, CardContainer, Card, TableContainer } from './styles';
+import formatDate from '../../utils/formatDate';
 
 interface Transaction {
-  id: string;
-  title: string;
-  value: number;
-  formattedValue: string;
-  formattedDate: string;
-  type: 'income' | 'outcome';
-  category: { title: string };
-  created_at: Date;
+    id: string;
+    title: string;
+    value: number;
+    formattedValue: string;
+    formattedDate: string;
+    type: 'income' | 'outcome';
+    category: { title: string };
+    created_at: Date;
 }
 
 interface Balance {
-  income: string;
-  outcome: string;
-  total: string;
+    income: number;
+    outcome: number;
+    total: number;
+    formattedIncome: string;
+    formattedOutcome: string;
+    formattedTotal: string;
+}
+
+interface Response {
+    transactions: Transaction[];
+    balance: Balance;
 }
 
 const Dashboard: React.FC = () => {
-  // const [transactions, setTransactions] = useState<Transaction[]>([]);
-  // const [balance, setBalance] = useState<Balance>({} as Balance);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [balance, setBalance] = useState<Balance>({} as Balance);
 
-  useEffect(() => {
-    async function loadTransactions(): Promise<void> {
-      // TODO
-    }
+    useEffect(() => {
+        async function loadTransactions(): Promise<void> {
+            const response = await api.get<Response>('transactions');
+            const {
+                balance: loadedBalance,
+                transactions: transactionsLoaded,
+            } = response.data;
 
-    loadTransactions();
-  }, []);
+            setTransactions(
+                transactionsLoaded.map(transaction => {
+                    return {
+                        ...transaction,
+                        formattedValue:
+                            (transaction.type === 'outcome' ? '- ' : '') +
+                            formatValue(transaction.value),
+                        formattedDate: formatDate(
+                            new Date(transaction.created_at),
+                        ),
+                    };
+                }),
+            );
 
-  return (
-    <>
-      <Header />
-      <Container>
-        <CardContainer>
-          <Card>
-            <header>
-              <p>Entradas</p>
-              <img src={income} alt="Income" />
-            </header>
-            <h1 data-testid="balance-income">R$ 5.000,00</h1>
-          </Card>
-          <Card>
-            <header>
-              <p>Saídas</p>
-              <img src={outcome} alt="Outcome" />
-            </header>
-            <h1 data-testid="balance-outcome">R$ 1.000,00</h1>
-          </Card>
-          <Card total>
-            <header>
-              <p>Total</p>
-              <img src={total} alt="Total" />
-            </header>
-            <h1 data-testid="balance-total">R$ 4000,00</h1>
-          </Card>
-        </CardContainer>
+            setBalance({
+                ...loadedBalance,
+                formattedIncome: formatValue(loadedBalance.income),
+                formattedOutcome: formatValue(loadedBalance.outcome),
+                formattedTotal: formatValue(loadedBalance.total),
+            });
+        }
 
-        <TableContainer>
-          <table>
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Preço</th>
-                <th>Categoria</th>
-                <th>Data</th>
-              </tr>
-            </thead>
+        loadTransactions();
+    }, []);
 
-            <tbody>
-              <tr>
-                <td className="title">Computer</td>
-                <td className="income">R$ 5.000,00</td>
-                <td>Sell</td>
-                <td>20/04/2020</td>
-              </tr>
-              <tr>
-                <td className="title">Website Hosting</td>
-                <td className="outcome">- R$ 1.000,00</td>
-                <td>Hosting</td>
-                <td>19/04/2020</td>
-              </tr>
-            </tbody>
-          </table>
-        </TableContainer>
-      </Container>
-    </>
-  );
+    return (
+        <>
+            <Header />
+            <Container>
+                <CardContainer>
+                    <Card>
+                        <header>
+                            <p>Entradas</p>
+                            <img src={income} alt="Income" />
+                        </header>
+                        <h1 data-testid="balance-income">
+                            {balance.formattedIncome}
+                        </h1>
+                    </Card>
+                    <Card>
+                        <header>
+                            <p>Saídas</p>
+                            <img src={outcome} alt="Outcome" />
+                        </header>
+                        <h1 data-testid="balance-outcome">
+                            {balance.formattedOutcome}
+                        </h1>
+                    </Card>
+                    <Card total>
+                        <header>
+                            <p>Total</p>
+                            <img src={total} alt="Total" />
+                        </header>
+                        <h1 data-testid="balance-total">
+                            {balance.formattedTotal}
+                        </h1>
+                    </Card>
+                </CardContainer>
+
+                <TableContainer>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Preço</th>
+                                <th>Categoria</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {transactions.map(transaction => (
+                                <tr key={transaction.id}>
+                                    <td className="title">
+                                        {transaction.title}
+                                    </td>
+                                    <td className={transaction.type}>
+                                        {transaction.formattedValue}
+                                    </td>
+                                    <td>{transaction.category.title}</td>
+                                    <td>{transaction.formattedDate}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </TableContainer>
+            </Container>
+        </>
+    );
 };
 
 export default Dashboard;
