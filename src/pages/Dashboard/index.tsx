@@ -15,18 +15,18 @@ import formatDate from '../../utils/formatDate';
 
 interface Transaction {
     id: string;
-    title: string;
+    description: string;
     value: number;
     formattedValue: string;
     formattedDate: string;
-    type: 'income' | 'outcome';
-    category: { title: string };
-    created_at: Date;
+    type: 'INCOME' | 'EXPENSE';
+    category: { name: string };
+    createdAt: Date;
 }
 
 interface Balance {
-    income: number;
-    outcome: number;
+    totalIncome: number;
+    totalExpense: number;
     total: number;
     formattedIncome: string;
     formattedOutcome: string;
@@ -44,21 +44,24 @@ const Dashboard: React.FC = () => {
 
     useEffect(() => {
         async function loadTransactions(): Promise<void> {
-            const response = await api.get<Response>('transactions');
+            const response = await api.get<Response>('transactions/summary');
             const {
                 balance: loadedBalance,
                 transactions: transactionsLoaded,
             } = response.data;
 
+            console.log(transactions)
+
             setTransactions(
                 transactionsLoaded.map(transaction => {
                     return {
                         ...transaction,
+                        description: transaction.description ? transaction.description : '-',
                         formattedValue:
-                            (transaction.type === 'outcome' ? '- ' : '') +
+                            (transaction.type === 'EXPENSE' ? '- ' : '') +
                             formatValue(transaction.value),
                         formattedDate: formatDate(
-                            new Date(transaction.created_at),
+                            new Date(transaction.createdAt),
                         ),
                     };
                 }),
@@ -66,8 +69,8 @@ const Dashboard: React.FC = () => {
 
             setBalance({
                 ...loadedBalance,
-                formattedIncome: formatValue(loadedBalance.income),
-                formattedOutcome: formatValue(loadedBalance.outcome),
+                formattedIncome: formatValue(loadedBalance.totalIncome),
+                formattedOutcome: formatValue(loadedBalance.totalExpense),
                 formattedTotal: formatValue(loadedBalance.total),
             });
         }
@@ -123,12 +126,12 @@ const Dashboard: React.FC = () => {
                             {transactions.map(transaction => (
                                 <tr key={transaction.id}>
                                     <td className="title">
-                                        {transaction.title}
+                                        {transaction.description}
                                     </td>
                                     <td className={transaction.type}>
                                         {transaction.formattedValue}
                                     </td>
-                                    <td>{transaction.category.title}</td>
+                                    <td>{transaction.category.name}</td>
                                     <td>{transaction.formattedDate}</td>
                                 </tr>
                             ))}

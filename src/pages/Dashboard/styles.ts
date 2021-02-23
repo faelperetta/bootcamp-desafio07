@@ -76,11 +76,11 @@ export const TableContainer = styled.section`
                 color: #363f5f;
             }
 
-            &.income {
+            &.INCOME {
                 color: #12a454;
             }
 
-            &.outcome {
+            &.EXPENSE {
                 color: #e83f5b;
             }
         }
