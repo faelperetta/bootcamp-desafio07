@@ -26,10 +26,15 @@
   "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier"],
   "rules": {
     "no-multi-str": "off",
-    "indent": ["error", 4],
+    "indent": ["error", 4,  {"ignoredNodes": ["JSXElement"]}],
     "react/jsx-indent": ["error", 4],
+    "react/jsx-indent-props": ["error", 4],
     "react/jsx-props-no-spreading": "off",
-    "prettier/prettier": "error",
+    "react/require-default-props": "off",
+    "react/prop-types": "off",
+    "prettier/prettier": ["error", {
+     "endOfLine":"auto"
+    }],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "react/jsx-filename-extension": [1, { "extensions": [".tsx"] }],

@@ -50,13 +50,15 @@ const Dashboard: React.FC = () => {
                 transactions: transactionsLoaded,
             } = response.data;
 
-            console.log(transactions)
+            console.log(transactions);
 
             setTransactions(
                 transactionsLoaded.map(transaction => {
                     return {
                         ...transaction,
-                        description: transaction.description ? transaction.description : '-',
+                        description: transaction.description
+                            ? transaction.description
+                            : '-',
                         formattedValue:
                             (transaction.type === 'EXPENSE' ? '- ' : '') +
                             formatValue(transaction.value),
