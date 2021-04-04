@@ -10,7 +10,13 @@ import Header from '../../components/Header';
 
 import formatValue from '../../utils/formatValue';
 
-import { Container, CardContainer, Card, TableContainer } from './styles';
+import {
+    Container,
+    CardContainer,
+    Card,
+    TableContainer,
+    MonthContainer,
+} from './styles';
 import formatDate from '../../utils/formatDate';
 
 interface Transaction {
@@ -41,16 +47,22 @@ interface Response {
 const Dashboard: React.FC = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [balance, setBalance] = useState<Balance>({} as Balance);
+    const [selectedMonthYear, setSelectedMonthYear] = useState<Date>(
+        new Date(),
+    );
 
     useEffect(() => {
         async function loadTransactions(): Promise<void> {
-            const response = await api.get<Response>('transactions/summary');
+            const response = await api.get<Response>('transactions/search', {
+                params: {
+                    month: selectedMonthYear.getMonth() + 1,
+                    year: selectedMonthYear.getFullYear(),
+                },
+            });
             const {
                 balance: loadedBalance,
                 transactions: transactionsLoaded,
             } = response.data;
-
-            console.log(transactions);
 
             setTransactions(
                 transactionsLoaded.map(transaction => {
@@ -78,12 +90,41 @@ const Dashboard: React.FC = () => {
         }
 
         loadTransactions();
-    }, []);
+    }, [selectedMonthYear]);
+
+    function nextMonth(): void {
+        const newDate: Date = new Date(
+            selectedMonthYear.getFullYear(),
+            selectedMonthYear.getMonth() + 1,
+        );
+        setSelectedMonthYear(newDate);
+    }
+
+    function previousMonth(): void {
+        const newDate: Date = new Date(
+            selectedMonthYear.getFullYear(),
+            selectedMonthYear.getMonth() - 1,
+        );
+        setSelectedMonthYear(newDate);
+    }
 
     return (
         <>
             <Header />
             <Container>
+                <MonthContainer>
+                    <button type="button" onClick={previousMonth}>
+                        Previous
+                    </button>
+                    <h1>
+                        {`${selectedMonthYear.toLocaleDateString('pt-BR', {
+                            month: 'long',
+                        })} - ${selectedMonthYear.getFullYear()}`}
+                    </h1>
+                    <button type="button" onClick={nextMonth}>
+                        Next
+                    </button>
+                </MonthContainer>
                 <CardContainer>
                     <Card>
                         <header>
